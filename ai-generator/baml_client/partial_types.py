@@ -47,4 +47,3 @@ class Tasks(BaseModel):
     estimated_hours: Optional[float] = None
     required_skills: List["Skills"]
     depends_on: List[Optional[int]]
-
