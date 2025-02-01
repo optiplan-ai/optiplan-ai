@@ -9,8 +9,7 @@ import hashlib
 import json
 import time
 import os
-
-pinecone_api_key = os.getenv("PINECONE_API_KEY")
+from configs import pinecone_api_key
 
 class PineconeSDK:
     def __init__(self, index_name: str = "skill-embeddings"):
