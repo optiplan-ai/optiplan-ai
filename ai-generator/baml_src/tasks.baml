@@ -36,3 +36,23 @@ function GenerateRoadmap(raw_text: string) -> Tasks[] {
     {{ ctx.output_format }}
   "#
 }
+
+test Test1 {
+
+  functions [GenerateRoadmap]
+
+  args {
+
+    raw_text #"
+Build a scalable AI-powered content management system with the following requirements:
+- React-based frontend with real-time collaboration features
+- Python backend with ML capabilities for content categorization
+- GraphQL API for efficient data fetching
+- Containerized microservices architecture
+- Cloud deployment with auto-scaling
+- Real-time analytics dashboard
+        "#
+
+      }
+
+}
