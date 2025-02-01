@@ -1,0 +1,218 @@
+[
+  {
+    "project_id": 1,
+    "project_name": "Personal Portfolio Website",
+    "description": "A personal portfolio showcasing projects and skills.",
+    "tasks": [101, 102, 103],
+    "team": [1],
+    "deadline": "2025-02-28",
+    "priority": "medium"
+  },
+  {
+    "project_id": 2,
+    "project_name": "Data Analysis Automation",
+    "description": "A Python script to automate large-scale data analysis.",
+    "tasks": [104, 105, 106],
+    "team": [2],
+    "deadline": "2025-03-15",
+    "priority": "high"
+  },
+  {
+    "project_id": 3,
+    "project_name": "Inventory Management System",
+    "description": "A desktop application for managing inventory for retail businesses.",
+    "tasks": [107, 108, 109],
+    "team": [3],
+    "deadline": "2025-03-10",
+    "priority": "high"
+  },
+  {
+    "project_id": 4,
+    "project_name": "Task Tracking Dashboard",
+    "description": "A real-time dashboard for tracking team tasks.",
+    "tasks": [110, 111, 112],
+    "team": [4],
+    "deadline": "2025-02-20",
+    "priority": "high"
+  },
+  {
+    "project_id": 5,
+    "project_name": "Mobile App UI Design",
+    "description": "A modern and intuitive design for a fitness tracking app.",
+    "tasks": [113, 114, 115],
+    "team": [5],
+    "deadline": "2025-03-01",
+    "priority": "medium"
+  },
+  {
+    "project_id": 6,
+    "project_name": "E-Learning Platform",
+    "description": "A web application for hosting online courses.",
+    "tasks": [116, 117, 118],
+    "team": [6],
+    "deadline": "2025-03-20",
+    "priority": "high"
+  },
+  {
+    "project_id": 7,
+    "project_name": "Cloud Deployment Tool",
+    "description": "A CLI tool to streamline Kubernetes deployment.",
+    "tasks": [119, 120, 121],
+    "team": [7],
+    "deadline": "2025-02-25",
+    "priority": "high"
+  },
+  {
+    "project_id": 8,
+    "project_name": "iOS Weather App",
+    "description": "A weather forecasting app for iOS devices.",
+    "tasks": [122, 123, 124],
+    "team": [8],
+    "deadline": "2025-03-05",
+    "priority": "medium"
+  },
+  {
+    "project_id": 9,
+    "project_name": "Vue.js E-Commerce Store",
+    "description": "An online store for small businesses built with Vue.js.",
+    "tasks": [125, 126, 127],
+    "team": [9],
+    "deadline": "2025-03-12",
+    "priority": "high"
+  },
+  {
+    "project_id": 10,
+    "project_name": "Ruby on Rails CRM Tool",
+    "description": "A custom CRM tool for managing customer interactions.",
+    "tasks": [128, 129, 130],
+    "team": [10],
+    "deadline": "2025-02-22",
+    "priority": "medium"
+  },
+  {
+    "project_id": 11,
+    "project_name": "Data Visualization Toolkit",
+    "description": "A Python-based toolkit for creating advanced data visualizations.",
+    "tasks": [131, 132, 133],
+    "team": [11],
+    "deadline": "2025-03-07",
+    "priority": "high"
+  },
+  {
+    "project_id": 12,
+    "project_name": ".NET Application for Financial Tracking",
+    "description": "A .NET-based app for managing personal finances.",
+    "tasks": [134, 135, 136],
+    "team": [12],
+    "deadline": "2025-03-18",
+    "priority": "medium"
+  },
+  {
+    "project_id": 13,
+    "project_name": "Next.js Blog Platform",
+    "description": "A fully functional blogging platform with Next.js.",
+    "tasks": [137, 138, 139],
+    "team": [13],
+    "deadline": "2025-02-28",
+    "priority": "high"
+  },
+  {
+    "project_id": 14,
+    "project_name": "Android Expense Tracker",
+    "description": "An Android app for tracking daily expenses.",
+    "tasks": [140, 141, 142],
+    "team": [14],
+    "deadline": "2025-03-05",
+    "priority": "medium"
+  },
+  {
+    "project_id": 15,
+    "project_name": "React Native Fitness App",
+    "description": "A mobile app to track fitness goals and workouts.",
+    "tasks": [143, 144, 145],
+    "team": [15],
+    "deadline": "2025-03-10",
+    "priority": "medium"
+  },
+  {
+    "project_id": 16,
+    "project_name": "Rust WebAssembly Compiler",
+    "description": "A Rust-based compiler for WebAssembly.",
+    "tasks": [146, 147, 148],
+    "team": [16],
+    "deadline": "2025-03-25",
+    "priority": "high"
+  },
+  {
+    "project_id": 17,
+    "project_name": "Frontend Framework Comparison Tool",
+    "description": "A tool to compare features and performance of frontend frameworks.",
+    "tasks": [149, 150, 151],
+    "team": [17],
+    "deadline": "2025-02-15",
+    "priority": "low"
+  },
+  {
+    "project_id": 18,
+    "project_name": "Apache Spark Optimization Scripts",
+    "description": "Scripts to optimize Spark performance for Big Data projects.",
+    "tasks": [152, 153, 154],
+    "team": [18],
+    "deadline": "2025-03-08",
+    "priority": "high"
+  },
+  {
+    "project_id": 19,
+    "project_name": "Full-Stack E-Commerce Website",
+    "description": "An e-commerce site built with React, Node.js, and MongoDB.",
+    "tasks": [155, 156, 157],
+    "team": [19],
+    "deadline": "2025-03-30",
+    "priority": "high"
+  },
+  {
+    "project_id": 20,
+    "project_name": "Flask Blog Engine",
+    "description": "A lightweight blogging engine using Flask.",
+    "tasks": [158, 159, 160],
+    "team": [20],
+    "deadline": "2025-02-28",
+    "priority": "medium"
+  },
+  {
+    "project_id": 20,
+    "project_name": "Flask Blog Engine",
+    "description": "A lightweight blogging engine using Flask.",
+    "tasks": [158, 159, 160],
+    "team": [20],
+    "deadline": "2025-02-28",
+    "priority": "medium"
+  },
+  {
+    "project_id": 21,
+    "project_name": "AI-Powered Recruitment Platform",
+    "description": "A platform that uses AI to match candidates with job opportunities based on their skills and experience.",
+    "tasks": [201, 202, 203, 204, 205],
+    "team": [1, 2, 3, 4],
+    "deadline": "2025-03-15",
+    "priority": "high"
+  },
+  {
+    "project_id": 22,
+    "project_name": "E-Learning Platform with Live Classes",
+    "description": "An e-learning platform that supports live streaming and interactive sessions.",
+    "tasks": [206, 207, 208, 209, 210],
+    "team": [5, 6, 7],
+    "deadline": "2025-04-01",
+    "priority": "medium"
+  },
+  {
+    "project_id": 23,
+    "project_name": "Smart Inventory Management System",
+    "description": "A system to automate and optimize inventory management using predictive analytics.",
+    "tasks": [211, 212, 213, 214, 215],
+    "team": [8, 9, 10, 11],
+    "deadline": "2025-02-28",
+    "priority": "high"
+  }
+]

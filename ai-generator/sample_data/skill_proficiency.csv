@@ -1,0 +1,58 @@
+user_id,skill,proficiency_level,last_used
+1,React,9,2025-01-10
+1,JavaScript,8,2024-12-15
+1,Node.js,8,2024-12-20
+2,Python,10,2025-01-01
+2,Django,9,2024-12-22
+2,Machine Learning,8,2024-11-30
+3,Java,9,2025-01-05
+3,Spring Boot,8,2024-12-10
+3,MySQL,9,2024-11-25
+4,HTML,7,2024-12-30
+4,CSS,7,2025-01-02
+4,Tailwind CSS,6,2024-11-20
+5,Kotlin,8,2025-01-10
+5,Android Development,9,2024-12-18
+5,Firebase,8,2024-12-12
+6,PHP,9,2025-01-01
+6,Laravel,8,2024-12-28
+6,PostgreSQL,9,2024-12-20
+7,Ruby,9,2025-01-08
+7,Ruby on Rails,8,2024-12-22
+7,Redis,7,2024-12-15
+8,C#,9,2025-01-11
+8,.NET,8,2024-12-30
+8,Azure,7,2024-11-25
+9,Go,9,2025-01-06
+9,Docker,8,2024-12-20
+9,Kubernetes,8,2024-12-05
+10,Swift,8,2025-01-09
+10,iOS Development,9,2024-12-18
+10,Core Data,8,2024-12-10
+11,Rust,8,2025-01-02
+11,WebAssembly,9,2024-12-28
+11,Blockchain,8,2024-12-15
+12,Angular,9,2025-01-03
+12,TypeScript,8,2024-12-30
+12,MongoDB,8,2024-12-20
+13,Perl,9,2025-01-05
+13,Linux,10,2025-01-01
+13,System Administration,8,2024-12-10
+14,Vue.js,8,2025-01-09
+14,GraphQL,9,2024-12-18
+14,Firebase,7,2024-12-15
+15,Scala,9,2025-01-04
+15,Akka,8,2024-12-20
+15,Kafka,8,2024-12-12
+16,JavaScript,9,2025-01-02
+16,Node.js,8,2024-12-25
+16,Express.js,7,2024-12-20
+17,Elixir,8,2025-01-07
+17,Phoenix,9,2024-12-28
+17,PostgreSQL,8,2024-12-10
+18,JavaScript,9,2025-01-05
+18,Next.js,8,2024-12-22
+18,Tailwind CSS,8,2024-12-15
+19,Python,9,2025-01-03
+19,Flask,8,2024-12-30
+19,SQLAlchemy,8,2024-12-25
