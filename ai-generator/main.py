@@ -14,37 +14,31 @@ def to_dict(obj):
         return [to_dict(item) for item in obj]
     return obj
 
-
-# Create a global instance of your Pinecone matcher.
-matcher = PineconeSDK(index_name="project-embeddings")
-
-
 # ======================
 # Pydantic Request Models
 # ======================
 
-class ProjectDescription(BaseModel):
+class BaseInput(BaseModel):
+    project_id: str
+    manager_id: str
+
+class GenTasksInput(BaseInput):
     project_description: str
 
 
-class UsersTasks(BaseModel):
-    users: List[Dict[str, Any]]
-    tasks: List[Dict[str, Any]]
-
-
-class UsersInput(BaseModel):
+class UsersInput(BaseInput):
     users: List[Dict[str, Any]]
 
 
-class TasksInput(BaseModel):
+class TasksInput(BaseInput):
     tasks: List[Dict[str, Any]]
 
 
-class SingleUser(BaseModel):
+class SingleUser(BaseInput):
     user: Dict[str, Any]
 
 
-class SingleTask(BaseModel):
+class SingleTask(BaseInput):
     task: Dict[str, Any]
 
 
@@ -53,7 +47,7 @@ class SingleTask(BaseModel):
 # ======================
 
 @app.post("/generate-tasks")
-async def generate_tasks(desc: ProjectDescription):
+async def generate_tasks(data: GenTasksInput):
     """
     Generate tasks from a given project description.
     This endpoint:
@@ -63,25 +57,43 @@ async def generate_tasks(desc: ProjectDescription):
       - Returns the tasks.
     """
     try:
-        response = client.b.GenerateRoadmap(desc.project_description)
+        response = client.b.GenerateRoadmap(data.project_description)
         tasks = to_dict(response)
+        for task in tasks:
+            task["task_id"] = f'{data.project_id}_{task["task_id"]}'
+            task["project_id"] = data.project_id
+            task["manager_id"] = data.manager_id
+            if "depends_on" in task:
+                task["depends_on"] = [f'{task["project_id"]}_{dep}' for dep in task["depends_on"]]
+
         # Optionally index the generated tasks.
-        matcher.index_tasks(tasks)
         return {"tasks": tasks}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/index-users-tasks")
-async def index_users_tasks(data: UsersTasks):
+@app.post("/index-users")
+async def index_users(data: UsersInput):
     """
-    Index a given set of users and tasks.
-    The request body should contain two keys: 'users' and 'tasks'.
+    Index a given set of users.
     """
     try:
+        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         matcher.index_users(data.users)
+        return {"message": "Users indexed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/index-tasks")
+async def index_tasks(data: TasksInput):
+    """
+    Index a given set of tasks.
+    """
+    try:
+        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         matcher.index_tasks(data.tasks)
-        return {"message": "Users and tasks indexed successfully"}
+        return {"message": "tasks indexed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -93,6 +105,7 @@ async def match_tasks_for_users(data: UsersInput):
     The matched tasks are embedded under the 'matched_tasks' field in the user object.
     """
     try:
+        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         updated_users = []
         for user in data.users:
             matches = matcher.find_matching_tasks(user)
@@ -110,6 +123,7 @@ async def match_users_for_tasks(data: TasksInput):
     The matched users are embedded under the 'matched_users' field in the task object.
     """
     try:
+        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         updated_tasks = []
         for task in data.tasks:
             matches = matcher.find_matching_users(task)
@@ -126,6 +140,7 @@ async def match_tasks_for_user(data: SingleUser):
     Find matching tasks for a single user.
     """
     try:
+        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         user = data.user
         matches = matcher.find_matching_tasks(user)
         return {"user": user, "matched_tasks": matches}
@@ -139,6 +154,7 @@ async def match_user_for_task(data: SingleTask):
     Find matching users for a single task.
     """
     try:
+        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         task = data.task
         matches = matcher.find_matching_users(task)
         return {"task": task, "matched_users": matches}
