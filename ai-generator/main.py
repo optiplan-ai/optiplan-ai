@@ -5,22 +5,25 @@ from PineconeSDK import PineconeSDK
 import baml_client as client
 
 app = FastAPI()
+matcher = PineconeSDK()
+
 
 def to_dict(obj):
     """Recursively convert non-subscriptable objects (with __dict__) to dicts."""
-    if hasattr(obj, '__dict__'):
+    if hasattr(obj, "__dict__"):
         return {k: to_dict(v) for k, v in vars(obj).items()}
-    if isinstance(obj, list):
-        return [to_dict(item) for item in obj]
-    return obj
+    return [to_dict(item) for item in obj] if isinstance(obj, list) else obj
+
 
 # ======================
 # Pydantic Request Models
 # ======================
 
+
 class BaseInput(BaseModel):
     project_id: str
     manager_id: str
+
 
 class GenTasksInput(BaseInput):
     project_description: str
@@ -46,6 +49,7 @@ class SingleTask(BaseInput):
 # API Endpoints
 # ======================
 
+
 @app.post("/generate-tasks")
 async def generate_tasks(data: GenTasksInput):
     """
@@ -64,12 +68,14 @@ async def generate_tasks(data: GenTasksInput):
             task["project_id"] = data.project_id
             task["manager_id"] = data.manager_id
             if "depends_on" in task:
-                task["depends_on"] = [f'{task["project_id"]}_{dep}' for dep in task["depends_on"]]
+                task["depends_on"] = [
+                    f'{task["project_id"]}_{dep}' for dep in task["depends_on"]
+                ]
 
         # Optionally index the generated tasks.
         return {"tasks": tasks}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/index-users")
@@ -78,11 +84,11 @@ async def index_users(data: UsersInput):
     Index a given set of users.
     """
     try:
-        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
-        matcher.index_users(data.users)
+        project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
+        matcher.index_users(data.users, project_details)
         return {"message": "Users indexed successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/index-tasks")
@@ -91,11 +97,11 @@ async def index_tasks(data: TasksInput):
     Index a given set of tasks.
     """
     try:
-        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
-        matcher.index_tasks(data.tasks)
+        project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
+        matcher.index_tasks(data.tasks, project_details)
         return {"message": "tasks indexed successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/match-tasks-for-users")
@@ -105,15 +111,15 @@ async def match_tasks_for_users(data: UsersInput):
     The matched tasks are embedded under the 'matched_tasks' field in the user object.
     """
     try:
-        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         updated_users = []
+        project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         for user in data.users:
-            matches = matcher.find_matching_tasks(user)
+            matches = matcher.find_matching_tasks(user, project_details)
             user["matched_tasks"] = matches
             updated_users.append(user)
         return {"users": updated_users}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/match-users-for-tasks")
@@ -123,15 +129,15 @@ async def match_users_for_tasks(data: TasksInput):
     The matched users are embedded under the 'matched_users' field in the task object.
     """
     try:
-        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         updated_tasks = []
+        project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         for task in data.tasks:
-            matches = matcher.find_matching_users(task)
+            matches = matcher.find_matching_users(task, [], project_details)
             task["matched_users"] = matches
             updated_tasks.append(task)
         return {"tasks": updated_tasks}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/match-tasks-for-user")
@@ -140,12 +146,12 @@ async def match_tasks_for_user(data: SingleUser):
     Find matching tasks for a single user.
     """
     try:
-        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         user = data.user
-        matches = matcher.find_matching_tasks(user)
+        project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
+        matches = matcher.find_matching_tasks(user, project_details)
         return {"user": user, "matched_tasks": matches}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/match-user-for-task")
@@ -154,9 +160,9 @@ async def match_user_for_task(data: SingleTask):
     Find matching users for a single task.
     """
     try:
-        matcher = PineconeSDK(project_id=data.project_id, manager_id=data.manager_id)
         task = data.task
-        matches = matcher.find_matching_users(task)
+        project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
+        matches = matcher.find_matching_users(task, [], project_details)
         return {"task": task, "matched_users": matches}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
