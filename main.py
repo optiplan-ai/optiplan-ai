@@ -58,6 +58,11 @@ class DeleteTasksInput(BaseInput):
 # ======================
 
 
+@app.get("/health-check")
+async def health_check():
+    return {"message": "Service is up and running"}
+
+    
 @app.post("/generate-tasks")
 async def generate_tasks(data: GenTasksInput):
     try:
