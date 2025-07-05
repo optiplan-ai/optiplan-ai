@@ -208,6 +208,16 @@ class PineconeSDK:
         self.tasks_store.delete(filter={"task_id": task_id}, namespace=namespace)
         print(f"Deleted index of task {task_id}.")
 
+    def delete_users(self, user_ids: List[str], namespace: str = "user_skills"):
+        """Delete multiple users from the index."""
+        for user_id in user_ids:
+            self.delete_user_index(user_id, namespace)
+
+    def delete_tasks(self, task_ids: List[str], namespace: str = "tasks"):
+        """Delete multiple tasks from the index."""
+        for task_id in task_ids:
+            self.delete_task_index(task_id, namespace)
+
     def find_matching_users(
         self,
         task: Dict,
