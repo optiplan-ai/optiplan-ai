@@ -4,8 +4,21 @@ from typing import List, Dict, Any
 from PineconeSDK import PineconeSDK
 import baml_client as client
 
-app = FastAPI()
-matcher = PineconeSDK()
+app = FastAPI(
+    title="OptiPlan AI Service",
+    description="AI-powered task generation and matching using Gemini embeddings",
+    version="1.0.0"
+)
+
+# Initialize matcher lazily to avoid cold start issues
+_matcher = None
+
+def get_matcher() -> PineconeSDK:
+    """Get or create the PineconeSDK instance."""
+    global _matcher
+    if _matcher is None:
+        _matcher = PineconeSDK()
+    return _matcher
 
 
 def to_dict(obj):
@@ -58,6 +71,11 @@ class DeleteTasksInput(BaseInput):
 # ======================
 
 
+@app.get("/")
+async def root():
+    return {"message": "OptiPlan AI Service - Powered by Gemini AI Embeddings", "status": "healthy"}
+
+
 @app.get("/health-check")
 async def health_check():
     return {"message": "Service is up and running"}
@@ -84,6 +102,7 @@ async def generate_tasks(data: GenTasksInput):
 @app.post("/index-users")
 async def index_users(data: UsersInput):
     try:
+        matcher = get_matcher()
         project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         matcher.index_users(data.users, project_details)
         return {"message": "Users indexed successfully"}
@@ -94,6 +113,7 @@ async def index_users(data: UsersInput):
 @app.post("/index-tasks")
 async def index_tasks(data: TasksInput):
     try:
+        matcher = get_matcher()
         project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         matcher.index_tasks(data.tasks, project_details)
         return {"message": "Tasks indexed successfully"}
@@ -104,6 +124,7 @@ async def index_tasks(data: TasksInput):
 @app.post("/match-tasks-for-users")
 async def match_tasks_for_users(data: UsersInput):
     try:
+        matcher = get_matcher()
         updated_users = []
         project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         for user in data.users:
@@ -118,6 +139,7 @@ async def match_tasks_for_users(data: UsersInput):
 @app.post("/match-users-for-tasks")
 async def match_users_for_tasks(data: TasksInput):
     try:
+        matcher = get_matcher()
         updated_tasks = []
         project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         for task in data.tasks:
@@ -132,6 +154,7 @@ async def match_users_for_tasks(data: TasksInput):
 @app.post("/match-tasks-for-user")
 async def match_tasks_for_user(data: SingleUser):
     try:
+        matcher = get_matcher()
         user = data.user
         project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         matches = matcher.find_matching_tasks(user, project_details)
@@ -143,6 +166,7 @@ async def match_tasks_for_user(data: SingleUser):
 @app.post("/match-user-for-task")
 async def match_user_for_task(data: SingleTask):
     try:
+        matcher = get_matcher()
         task = data.task
         project_details = {"project_id": data.project_id, "manager_id": data.manager_id}
         matches = matcher.find_matching_users(task, [], project_details)
@@ -154,6 +178,7 @@ async def match_user_for_task(data: SingleTask):
 @app.post("/delete-indexed-users")
 async def delete_indexed_users(data: DeleteUsersInput):
     try:
+        matcher = get_matcher()
         matcher.delete_users(data.user_ids)
         return {"message": "Users Index deleted successfully"}
     except Exception as e:
@@ -163,7 +188,13 @@ async def delete_indexed_users(data: DeleteUsersInput):
 @app.post("/delete-indexed-tasks")
 async def delete_indexed_tasks(data: DeleteTasksInput):
     try:
+        matcher = get_matcher()
         matcher.delete_tasks(data.task_ids)
         return {"message": "Tasks Index deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+# Vercel handler
+def handler(request, response):
+    return app(request, response)
