@@ -1,12 +1,74 @@
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
-from langchain_huggingface import HuggingFaceEmbeddings
 from typing import Dict, List
 from langchain.schema import Document
 import numpy as np
 import hashlib
 import time
-from configs import pinecone_api_key
+import google.generativeai as genai
+from langchain.embeddings.base import Embeddings
+from configs import pinecone_api_key, google_api_key
+
+
+class GeminiEmbeddings(Embeddings):
+    """Custom embeddings class using Google's Gemini text-embedding-004 model."""
+    
+    def __init__(self, model_name: str = "text-embedding-004"):
+        """Initialize Gemini embeddings with the specified model."""
+        genai.configure(api_key=google_api_key)
+        self.model_name = model_name
+        # Get embedding dimensions by testing with a simple text
+        self._embedding_dimensions = self._get_embedding_dimensions()
+    
+    def _get_embedding_dimensions(self) -> int:
+        """Get the dimensions of embeddings from the model."""
+        try:
+            result = genai.embed_content(
+                model=f"models/{self.model_name}",
+                content="test",
+                task_type="retrieval_document"
+            )
+            return len(result['embedding'])
+        except Exception as e:
+            print(f"Error getting embedding dimensions: {e}")
+            # Default to 768 for text-embedding-004 model
+            return 768
+    
+    @property
+    def embedding_dimensions(self) -> int:
+        """Return the embedding dimensions."""
+        return self._embedding_dimensions
+    
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Embed a list of documents using Gemini."""
+        embeddings = []
+        for text in texts:
+            try:
+                result = genai.embed_content(
+                    model=f"models/{self.model_name}",
+                    content=text,
+                    task_type="retrieval_document"
+                )
+                embeddings.append(result['embedding'])
+            except Exception as e:
+                print(f"Error embedding text: {e}")
+                # Fallback to zero vector if embedding fails
+                embeddings.append([0.0] * self._embedding_dimensions)
+        return embeddings
+    
+    def embed_query(self, text: str) -> List[float]:
+        """Embed a query using Gemini."""
+        try:
+            result = genai.embed_content(
+                model=f"models/{self.model_name}",
+                content=text,
+                task_type="retrieval_query"
+            )
+            return result['embedding']
+        except Exception as e:
+            print(f"Error embedding query: {e}")
+            # Fallback to zero vector if embedding fails
+            return [0.0] * self._embedding_dimensions
 
 
 class PineconeSDK:
@@ -20,22 +82,16 @@ class PineconeSDK:
         """
         self.pc = Pinecone(api_key=pinecone_api_key)
 
-        # Local embeddings with slightly lower quality
-        self.skills_embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
+        # Use Gemini embeddings instead of local HuggingFace models
+        self.skills_embeddings = GeminiEmbeddings()
+        self.tasks_embeddings = GeminiEmbeddings()
 
-        self.tasks_embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
+        # Get embedding dimensions from the model
+        embedding_dimensions = self.skills_embeddings.embedding_dimensions
 
         # Initialize Pinecone indexes for skills and tasks
-        skills_index = self._initialize_index(skills_index)
-        tasks_index = self._initialize_index(tasks_index)
+        skills_index = self._initialize_index(skills_index, dimensions=embedding_dimensions)
+        tasks_index = self._initialize_index(tasks_index, dimensions=embedding_dimensions)
 
         # Create separate vector stores
         self.skills_store = PineconeVectorStore(
@@ -49,7 +105,7 @@ class PineconeSDK:
     def _initialize_index(
         self,
         index_name: str,
-        dimensions: int = 1024,
+        dimensions: int = 768,
         metric: str = "cosine",
         spec: ServerlessSpec = None,
     ) -> str:
@@ -58,7 +114,7 @@ class PineconeSDK:
         if index_name not in existing_indexes:
             self.pc.create_index(
                 name=index_name,
-                dimension=768,
+                dimension=dimensions,
                 metric=metric,
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
                 deletion_protection="disabled",
@@ -321,3 +377,15 @@ class PineconeSDK:
             matches.append(match_data)
 
         return sorted(matches, key=lambda x: x["match_score"], reverse=True)[:top_k]
+
+    def delete_users(self, user_ids: List[str], namespace: str = "user_skills"):
+        """Delete all indexed skills related to multiple users."""
+        for user_id in user_ids:
+            self.delete_user_index(user_id, namespace)
+        print(f"Deleted skills indexes for {len(user_ids)} users.")
+
+    def delete_tasks(self, task_ids: List[str], namespace: str = "tasks"):
+        """Delete multiple tasks from the index."""
+        for task_id in task_ids:
+            self.delete_task_index(task_id, namespace)
+        print(f"Deleted indexes for {len(task_ids)} tasks.")
