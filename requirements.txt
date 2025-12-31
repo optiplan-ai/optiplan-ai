@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-pinecone-client
-langchain-pinecone
-langchain
+upstash-vector
 google-generativeai
-baml-py
+crewai
+crewai-tools
 python-dotenv
+numpy
+requests
