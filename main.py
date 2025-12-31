@@ -1,31 +1,24 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
-from PineconeSDK import PineconeSDK
-import baml_client as client
+from UpstashVectorStore import UpstashVectorStore
+from crewai_agents import generate_tasks
 
 app = FastAPI(
     title="OptiPlan AI Service",
-    description="AI-powered task generation and matching using Gemini embeddings",
-    version="1.0.0"
+    description="AI-powered task generation and matching using CrewAI and Gemini embeddings",
+    version="2.0.0"
 )
 
 # Initialize matcher lazily to avoid cold start issues
 _matcher = None
 
-def get_matcher() -> PineconeSDK:
-    """Get or create the PineconeSDK instance."""
+def get_matcher() -> UpstashVectorStore:
+    """Get or create the UpstashVectorStore instance."""
     global _matcher
     if _matcher is None:
-        _matcher = PineconeSDK()
+        _matcher = UpstashVectorStore()
     return _matcher
-
-
-def to_dict(obj):
-    """Recursively convert non-subscriptable objects (with __dict__) to dicts."""
-    if hasattr(obj, "__dict__"):
-        return {k: to_dict(v) for k, v in vars(obj).items()}
-    return [to_dict(item) for item in obj] if isinstance(obj, list) else obj
 
 
 # ======================
@@ -73,7 +66,7 @@ class DeleteTasksInput(BaseInput):
 
 @app.get("/")
 async def root():
-    return {"message": "OptiPlan AI Service - Powered by Gemini AI Embeddings", "status": "healthy"}
+    return {"message": "OptiPlan AI Service - Powered by CrewAI and Gemini AI", "status": "healthy"}
 
 
 @app.get("/health-check")
@@ -82,17 +75,19 @@ async def health_check():
 
     
 @app.post("/generate-tasks")
-async def generate_tasks(data: GenTasksInput):
+async def generate_tasks_endpoint(data: GenTasksInput):
     try:
-        response = client.b.GenerateRoadmap(data.project_description)
-        tasks = to_dict(response)
+        # Use CrewAI to generate tasks
+        tasks = generate_tasks(data.project_description)
+        
+        # Process tasks to add project and manager IDs
         for task in tasks:
-            task["task_id"] = f'{data.project_id}_{task["task_id"]}'
+            task["task_id"] = f'{data.project_id}_{task.get("task_id", len(tasks))}'
             task["project_id"] = data.project_id
             task["manager_id"] = data.manager_id
             if "depends_on" in task:
                 task["depends_on"] = [
-                    f'{task["project_id"]}_{dep}' for dep in task["depends_on"]
+                    f'{data.project_id}_{dep}' for dep in task["depends_on"]
                 ]
         return {"tasks": tasks}
     except Exception as e:
